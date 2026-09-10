@@ -1,6 +1,4 @@
-"""
-Geometry Dash Clone – Ultimate Edition
-Tamamen pygame çizim + programatik ses ile oluşturulmuş kapsamlı 2D GD klonu.
+"""Pulse Runner, an original single-file rhythm-platformer prototype.
 
 Özellikler:
   - Küp & Gemi modları + Yerçekimi değiştirme
@@ -12,11 +10,13 @@ Tamamen pygame çizim + programatik ses ile oluşturulmuş kapsamlı 2D GD klonu
   - 8 bölümlük el yapımı seviye
 """
 
-import pygame
 import math
 import random
-import sys
 import struct
+import sys
+from pathlib import Path
+
+import pygame
 
 # ═══════════════════════════════════════════════════════════════════════════════
 #  SABİTLER
@@ -26,6 +26,12 @@ WIDTH, HEIGHT = 900, 500
 FPS = 60
 GROUND_Y = HEIGHT - 70
 CEILING_Y = 50
+ASSET_DIR = Path(__file__).resolve().parent
+
+
+def asset_path(filename):
+    """Resolve an optional user asset independently of the launch directory."""
+    return ASSET_DIR / filename
 
 # Renkler
 BG_TOP = (10, 5, 40)
@@ -252,12 +258,12 @@ class Player:
 
     def _build_surfaces(self):
         s = self.size
-        import os
 
         # Küp
-        if os.path.exists('player.png'):
+        player_image = asset_path('player.png')
+        if player_image.is_file():
             try:
-                img = pygame.image.load('player.png').convert_alpha()
+                img = pygame.image.load(player_image).convert_alpha()
                 self.cube_surf = pygame.transform.scale(img, (s, s))
             except Exception:
                 self._draw_default_cube(s)
@@ -265,9 +271,10 @@ class Player:
             self._draw_default_cube(s)
 
         # Gemi
-        if os.path.exists('ship.png'):
+        ship_image = asset_path('ship.png')
+        if ship_image.is_file():
             try:
-                img = pygame.image.load('ship.png').convert_alpha()
+                img = pygame.image.load(ship_image).convert_alpha()
                 self.ship_surf = pygame.transform.scale(img, (s + 10, s))
             except Exception:
                 self._draw_default_ship(s)
@@ -951,7 +958,7 @@ class Game:
         pygame.mixer.pre_init(44100, -16, 1, 512)
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption("Geometry Dash – Ultimate Edition")
+        pygame.display.set_caption("Pulse Runner")
         self.clock = pygame.time.Clock()
 
         self.font_title = pygame.font.SysFont("Arial", 56, bold=True)
@@ -1664,6 +1671,11 @@ class Game:
 #  GİRİŞ NOKTASI
 # ═══════════════════════════════════════════════════════════════════════════════
 
-if __name__ == '__main__':
+def main():
+    """Run the interactive game."""
     game = Game()
     game.run()
+
+
+if __name__ == '__main__':
+    main()
