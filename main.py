@@ -24,6 +24,8 @@ import pygame
 
 WIDTH, HEIGHT = 900, 500
 FPS = 60
+SIMULATION_STEP = 1 / FPS
+MAX_FRAME_SECONDS = 0.25
 GROUND_Y = HEIGHT - 70
 CEILING_Y = 50
 ASSET_DIR = Path(__file__).resolve().parent
@@ -90,7 +92,24 @@ PLAYER_X = 150
 
 # Beat
 BPM = 128
-BEAT_FRAMES = int(60 / (BPM / 60))
+BEAT_SECONDS = 60 / BPM
+
+
+class SimulationClock:
+    """Advance 60 Hz game logic from elapsed time, independent of drawn frames."""
+
+    def __init__(self):
+        self.accumulator = 0.0
+
+    def advance(self, elapsed_seconds, update):
+        if not math.isfinite(elapsed_seconds) or elapsed_seconds <= 0:
+            return
+        # A long window stall must not cause an unbounded catch-up loop.
+        self.accumulator += min(elapsed_seconds, MAX_FRAME_SECONDS)
+        while self.accumulator + 1e-9 >= SIMULATION_STEP:
+            update()
+            self.accumulator -= SIMULATION_STEP
+        self.accumulator = max(0.0, self.accumulator)
 
 # Parallax arka plan renkleri
 BG_SHAPE_COLORS = [
@@ -960,6 +979,7 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Pulse Runner")
         self.clock = pygame.time.Clock()
+        self.sim_clock = SimulationClock()
 
         self.font_title = pygame.font.SysFont("Arial", 56, bold=True)
         self.font_big = pygame.font.SysFont("Arial", 44, bold=True)
@@ -980,6 +1000,7 @@ class Game:
         self.player_color_index = 0
         self.ground_offset = 0.0
         self.pulse_timer = 0
+        self.beat_elapsed = 0.0
         self.beat_pulse = 0.0
         self.flash_alpha = 0
         self.screen_shake = 0
@@ -1030,7 +1051,7 @@ class Game:
     def run(self):
         running = True
         while running:
-            self.clock.tick(FPS)
+            elapsed_seconds = self.clock.tick(FPS) / 1000.0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -1057,7 +1078,7 @@ class Game:
                         self._handle_action()
             if not running:
                 break
-            self._update()
+            self.sim_clock.advance(elapsed_seconds, self._update)
             self._draw()
             pygame.display.flip()
         pygame.quit()
@@ -1137,7 +1158,9 @@ class Game:
 
     def _update(self):
         self.pulse_timer += 1
-        if self.pulse_timer % BEAT_FRAMES == 0:
+        self.beat_elapsed += SIMULATION_STEP
+        if self.beat_elapsed + 1e-9 >= BEAT_SECONDS:
+            self.beat_elapsed -= BEAT_SECONDS
             self.beat_pulse = 1.0
             for col in self.pulse_columns:
                 col.pulse()
