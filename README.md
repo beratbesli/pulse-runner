@@ -59,6 +59,11 @@ The current version intentionally keeps the playable prototype in one module.
 Future gameplay changes should first extract deterministic physics and level
 state from rendering and audio rather than growing the `Game` class further.
 
+Game logic advances in fixed 60 Hz steps from elapsed time, while the pulse
+tracks 128 BPM in seconds. A frame stalled longer than 250 ms is capped to
+avoid a large catch-up burst. Tests compare gameplay and beats at 30, 60,
+and 120 drawing frames per second.
+
 ## License
 
 [MIT](LICENSE)
