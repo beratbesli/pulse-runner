@@ -1,63 +1,27 @@
 # Pulse Runner
 
-Pulse Runner is an original, compact rhythm-platformer prototype built with
-Pygame. It combines cube and ship movement, gravity changes, jump pads and
-orbs, practice checkpoints, collectibles, generated sound effects, and one
-hand-authored level.
+A simple rhythm-platformer game built with Pygame.
 
-The project is inspired by the broader rhythm-platformer genre. It is not
-affiliated with or distributed by another game or publisher.
-
-## Requirements
-
-- Python 3.10 or newer
-- Pygame 2.6
-
-## Run
+## Setup & Run
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -e .
-pulse-runner
+pip install -r requirements.txt
+python main.py
 ```
-
-On Windows, activate the environment with `.venv\Scripts\activate`.
 
 ## Controls
 
 | Input | Action |
 |---|---|
-| `Space` or left click | Start, jump, use an orb, or retry |
-| Hold left click | Control ship lift |
+| `Space` / Left Click | Start, jump, use orb, or retry |
+| Hold Left Click | Ship lift |
 | `P` | Toggle practice mode |
-| Left / right arrow | Select player colour on the menu |
-| `Esc` | Return to the menu or quit |
+| `Left` / `Right` Arrow | Select player color on menu |
+| `Esc` | Return to menu or quit |
 
-## Optional artwork
+## Custom Artwork (Optional)
 
-Place `player.png` or `ship.png` next to `main.py` to replace the generated
-player artwork. Assets are resolved relative to the installed game module, so
-launching the command from another directory does not change their location.
-If an image is absent or invalid, the built-in vector artwork is used.
-
-Only use artwork that you created or have permission to redistribute. Personal
-assets should not be committed unless their license is documented.
-
-## Development
-
-```bash
-python -m pip install -e ".[dev]"
-python -m pytest
-python -m build
-```
-
-CI runs the same tests with dummy video and audio drivers, so core state and
-asset-path behavior can be checked without opening a window.
-
-The current version intentionally keeps the playable prototype in one module.
-Future gameplay changes should first extract deterministic physics and level
-state from rendering and audio rather than growing the `Game` class further.
+Place `player.png` or `ship.png` in the same folder as `main.py` to override the default visuals.
 
 Game logic advances in fixed 60 Hz steps from elapsed time, while the pulse
 tracks 128 BPM in seconds. A frame stalled longer than 250 ms is capped to
